@@ -10,6 +10,7 @@ public class Student implements Serializable{
 
     private Long id;
     private String name;
+    private String photoPath;
     private String address;
     private String email;
     private String number;
@@ -31,6 +32,10 @@ public class Student implements Serializable{
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getPhotoPath() { return photoPath; }
+
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 
     public String getAddress() {
         return address;

@@ -1,9 +1,12 @@
 package br.com.costa.agenda;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Browser;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -16,12 +19,14 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import br.com.costa.agenda.adapter.StudentAdapter;
 import br.com.costa.agenda.dao.StudentDAO;
 import br.com.costa.agenda.model.Student;
+import br.com.costa.agenda.utils.ConstantCodes;
 
 public class StudentsListActivity extends AppCompatActivity {
 
-    ListView studentListView;
+    private ListView studentListView;
 
     @Override
     protected void onResume() {
@@ -66,17 +71,17 @@ public class StudentsListActivity extends AppCompatActivity {
                                     final ContextMenu.ContextMenuInfo menuInfo) {
 
         MenuItem callNumber = menu.add("Telefonar");
-        MenuItem callEditedNumber = menu.add("Preparar para telefonar");
-        MenuItem goToSite = menu.add("Visitar site");
-        MenuItem sendSMS = menu.add("Mandar SMS");
-        MenuItem showAddress = menu.add("Ver endereço");
+        final MenuItem callEditedNumber = menu.add("Preparar para telefonar");
+        final MenuItem goToSite = menu.add("Visitar site");
+        final MenuItem sendSMS = menu.add("Mandar SMS");
+        final MenuItem showAddress = menu.add("Ver endereço");
         MenuItem deleteMenuItem = menu.add("Delete");
 
         AdapterView.AdapterContextMenuInfo adapterMenuInfo =
                 (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Student student =
+        final Student student =
                 (Student) studentListView.getItemAtPosition(adapterMenuInfo.position);
-        StudentDAO studentDAO = new StudentDAO(StudentsListActivity.this);
+        final StudentDAO studentDAO = new StudentDAO(StudentsListActivity.this);
 
         buildCallNumber(callNumber, student, studentDAO);
         buildCallEditedNumber(callEditedNumber, student, studentDAO);
@@ -90,30 +95,44 @@ public class StudentsListActivity extends AppCompatActivity {
 
     }
 
+    private void buildCallNumber(MenuItem callNumber, final Student student, final StudentDAO studentDAO) {
+        callNumber.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener(){
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(ActivityCompat.checkSelfPermission(StudentsListActivity.this,
+                        Manifest.permission.CALL_PHONE)
+                        != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(StudentsListActivity.this,
+                            new String[]{Manifest.permission.CALL_PHONE},
+                            ConstantCodes.CALL_PHONE_PERMISSION);
+                } else {
+                    String number = studentDAO.findStudentAttributeById(student.getId(), "number");
+                    Intent callNumberIntent = new Intent(Intent.ACTION_CALL);
+                    if (number.startsWith("+")) {
+                        callNumberIntent.setData(Uri.parse("tel:" + number));
+                    } else if (number.length() == 11 || number.length() == 10) {
+                        callNumberIntent.setData(Uri.parse("tel:+55" + number));
+                    } else {
+                        callNumberIntent.setData(Uri.parse("tel:+5583" + number));
+                    }
+                    startActivity(callNumberIntent);
+                }
+                return false;
+            }
+        });
+    }
+
     private void buildCallEditedNumber(MenuItem callEditedNumber, Student student, StudentDAO studentDAO) {
         String number = studentDAO.findStudentAttributeById(student.getId(), "number");
         Intent callEditedNumberIntent = new Intent(Intent.ACTION_VIEW);
-        if(number.startsWith("+")){
+        if (number.startsWith("+")) {
             callEditedNumberIntent.setData(Uri.parse("tel:" + number));
-        } else if(number.length() == 11 || number.length() == 10){
+        } else if (number.length() == 11 || number.length() == 10) {
             callEditedNumberIntent.setData(Uri.parse("tel:+55" + number));
         } else {
             callEditedNumberIntent.setData(Uri.parse("tel:+5583" + number));
         }
         callEditedNumber.setIntent(callEditedNumberIntent);
-    }
-
-    private void buildCallNumber(MenuItem callNumber, Student student, StudentDAO studentDAO) {
-        String number = studentDAO.findStudentAttributeById(student.getId(), "number");
-        Intent callNumberIntent = new Intent(Intent.ACTION_CALL);
-        if(number.startsWith("+")){
-            callNumberIntent.setData(Uri.parse("tel:" + number));
-        } else if(number.length() == 11 || number.length() == 10){
-            callNumberIntent.setData(Uri.parse("tel:+55" + number));
-        } else {
-            callNumberIntent.setData(Uri.parse("tel:+5583" + number));
-        }
-        callNumber.setIntent(callNumberIntent);
     }
 
     private void buildShowAddress(MenuItem showAddress, Student student, StudentDAO studentDAO) {
@@ -126,9 +145,9 @@ public class StudentsListActivity extends AppCompatActivity {
     private void buildSendSMS(MenuItem sendSMS, Student student, StudentDAO studentDAO) {
         String number = studentDAO.findStudentAttributeById(student.getId(), "number");
         Intent sendSMSIntent = new Intent(Intent.ACTION_VIEW);
-        if(number.startsWith("+")){
+        if (number.startsWith("+")) {
             sendSMSIntent.setData(Uri.parse("sms:" + number));
-        } else if(number.length() == 11 || number.length() == 10){
+        } else if (number.length() == 11 || number.length() == 10) {
             sendSMSIntent.setData(Uri.parse("sms:+55" + number));
         } else {
             sendSMSIntent.setData(Uri.parse("sms:+5583" + number));
@@ -163,9 +182,9 @@ public class StudentsListActivity extends AppCompatActivity {
     private void buildGoToSite(MenuItem goToSite, Student student, StudentDAO studentDAO) {
         String site = studentDAO.findStudentAttributeById(student.getId(), "site");
         Intent goToSiteIntent = new Intent(Intent.ACTION_VIEW);
-        if(site.startsWith("http://")){
+        if (site.startsWith("http://")) {
             goToSiteIntent.setData(Uri.parse(site));
-        } else if(site.startsWith("www.")){
+        } else if (site.startsWith("www.")) {
             goToSiteIntent.setData(Uri.parse("http://" + site));
         } else {
             goToSiteIntent.setData(Uri.parse("http://www." + site));
@@ -179,9 +198,19 @@ public class StudentsListActivity extends AppCompatActivity {
         List<Student> studentList = studentDAO.read();
         studentDAO.close();
 
-        ArrayAdapter<Student> studentsListViewAdapter =
-                new ArrayAdapter<Student>(this, android.R.layout.simple_list_item_1, studentList);
-        studentListView.setAdapter(studentsListViewAdapter);
+        StudentAdapter studentListViewAdapter = new StudentAdapter(this, studentList);
+        studentListView.setAdapter(studentListViewAdapter);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == ConstantCodes.CALL_PHONE_PERMISSION){
+            // Insira algum tratamento a ser realizado na hora da requisição, se houver
+        }
     }
 
 }

@@ -19,7 +19,7 @@ import br.com.costa.agenda.model.Student;
 public class StudentDAO extends SQLiteOpenHelper{
 
     public StudentDAO(Context context) {
-        super(context, "Agenda", null, 1);
+        super(context, "Agenda", null, 2);
     }
 
     @Override
@@ -32,18 +32,20 @@ public class StudentDAO extends SQLiteOpenHelper{
                     "email TEXT NOT NULL,"+
                     "number TEXT NOT NULL,"+
                     "site TEXT NOT NULL,"+
-                    "note REAL NOT NULL)";
+                    "note REAL NOT NULL,"+
+                    "photopath TEXT)";
 
         db.execSQL(sqlCreateTableStudents);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String sqlUpdateTableStudents =
-                "DROP TABLE IF EXISTS Students";
-
-        db.execSQL(sqlUpdateTableStudents);
-        onCreate(db);
+        switch (oldVersion) {
+            case 1:
+                String sql_version1 = "ALTER TABLE Students ADD COLUMN photopath TEXT";
+                db.execSQL(sql_version1); // indo para versão 2
+                break;
+        }
     }
 
     public void create(Student student) {
@@ -81,6 +83,8 @@ public class StudentDAO extends SQLiteOpenHelper{
                     cursorReadStudents.getColumnIndex("site")));
             student.setNote(cursorReadStudents.getDouble(
                     cursorReadStudents.getColumnIndex("note")));
+            student.setPhotoPath(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("photopath")));
 
             alunos.add(student);
         }
@@ -140,6 +144,7 @@ public class StudentDAO extends SQLiteOpenHelper{
         studentValues.put("number", student.getNumber());
         studentValues.put("site", student.getSite());
         studentValues.put("note", student.getNote());
+        studentValues.put("photopath", student.getPhotoPath());
         return studentValues;
     }
 }

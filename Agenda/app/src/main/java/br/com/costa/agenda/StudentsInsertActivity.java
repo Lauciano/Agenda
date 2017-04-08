@@ -1,22 +1,34 @@
 package br.com.costa.agenda;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.File;
 
 import br.com.costa.agenda.dao.StudentDAO;
 import br.com.costa.agenda.model.Student;
+import br.com.costa.agenda.utils.ConstantCodes;
 import br.com.costa.agenda.utils.StudentsInsertUtil;
 
 public class StudentsInsertActivity extends AppCompatActivity {
 
-
     private StudentsInsertUtil studentsInsertUtil;
+    private FloatingActionButton cameraButton;
+    private String pathPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,12 +37,24 @@ public class StudentsInsertActivity extends AppCompatActivity {
         setContentView(R.layout.activity_students_insert);
 
         studentsInsertUtil = new StudentsInsertUtil(StudentsInsertActivity.this);
+        cameraButton = (FloatingActionButton) findViewById(R.id.cameraButton);
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cameraButtonIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                pathPhoto = getExternalFilesDir(null) + "/" + System.currentTimeMillis() + ".jpg";
+                File filePhoto = new File(pathPhoto);
+                cameraButtonIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(filePhoto));
+                startActivityForResult(cameraButtonIntent, ConstantCodes.PHOTO_CODE);
+            }
+        });
 
         Intent intent = getIntent();
         Student editStudent = (Student) intent.getSerializableExtra("student");
 
 
-        if (editStudent != null){
+        if (editStudent != null) {
             studentsInsertUtil.buildEditStudent(editStudent);
         }
 
@@ -48,16 +72,16 @@ public class StudentsInsertActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.StudentsInsert_MenuOk:
                 Student student = new Student();
                 try {
                     StudentDAO studentDAO = new StudentDAO(StudentsInsertActivity.this);
                     student = studentsInsertUtil.buildStudentForInsert();
 
-                    if (student.getId() != null){
+                    if (student.getId() != null) {
                         studentDAO.update(student);
-                    }else{
+                    } else {
                         studentDAO.create(student);
                     }
 
@@ -66,7 +90,7 @@ public class StudentsInsertActivity extends AppCompatActivity {
                             "Novo aluno " + student.getName() + " salvo!",
                             Toast.LENGTH_SHORT).show();
                     finish();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Toast.makeText(StudentsInsertActivity.this,
                             "Erro ao salvar novo aluno. \n" + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
@@ -78,4 +102,20 @@ public class StudentsInsertActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == ConstantCodes.PHOTO_CODE) {
+                ImageView imageViewPhoto = (ImageView) findViewById(R.id.imageView);
+                Bitmap bitmap = BitmapFactory.decodeFile(pathPhoto);
+                Bitmap bitmapReduce = Bitmap.createScaledBitmap(bitmap, 300, 300, true);
+                imageViewPhoto.setImageBitmap(bitmapReduce);
+                imageViewPhoto.setScaleType(ImageView.ScaleType.FIT_XY);
+                imageViewPhoto.setTag(pathPhoto);
+            }
+        }
+    }
 }
+
+

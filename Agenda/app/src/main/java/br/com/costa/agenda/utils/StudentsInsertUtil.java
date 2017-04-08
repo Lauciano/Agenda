@@ -1,7 +1,10 @@
 package br.com.costa.agenda.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 
 import br.com.costa.agenda.R;
@@ -13,6 +16,7 @@ import br.com.costa.agenda.model.Student;
 
 public class StudentsInsertUtil{
 
+    private ImageView viewPhoto;
     private EditText textName;
     private EditText textAddress;
     private EditText textEmail;
@@ -23,6 +27,7 @@ public class StudentsInsertUtil{
 
     public StudentsInsertUtil(AppCompatActivity appCompatActivity){
 
+        viewPhoto = (ImageView) appCompatActivity.findViewById(R.id.imageView);
         textName = (EditText) appCompatActivity.findViewById(R.id.studentsInsert_editTextName);
         textAddress = (EditText) appCompatActivity.findViewById(R.id.studentsInsert_editTextAddres);
         textEmail = (EditText) appCompatActivity.findViewById(R.id.studentsInsert_editTextEmail);
@@ -47,7 +52,7 @@ public class StudentsInsertUtil{
         }
 
         if (textNumber.getText().toString().equals("")) {
-            throw new Exception("Camnpo 'número' obrigatório!");
+            throw new Exception("Campo 'número' obrigatório!");
         }
 
 //        if (textSite.getText().toString() == "") {
@@ -57,6 +62,11 @@ public class StudentsInsertUtil{
 //        if (ratingNote.getRating() == 0) {
 //            throw new Exception();
 //        }
+
+
+        String pathPhoto;
+        if (viewPhoto.getTag() != null) pathPhoto = viewPhoto.getTag().toString();
+        else pathPhoto = "";
 
         String name = textName.getText().toString();
 
@@ -70,6 +80,7 @@ public class StudentsInsertUtil{
 
         Float note = ratingNote.getRating();
 
+        this.student.setPhotoPath(pathPhoto);
         this.student.setName(name);
         this.student.setAddress(address);
         this.student.setEmail(email);
@@ -81,6 +92,15 @@ public class StudentsInsertUtil{
     }
 
     public void buildEditStudent(Student editStudent) {
+
+        if(editStudent.getPhotoPath() != null) {
+            String photoPath = editStudent.getPhotoPath();
+            Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+            Bitmap bitmapReduce = Bitmap.createScaledBitmap(bitmap, 300, 300, true);
+            viewPhoto.setImageBitmap(bitmapReduce);
+            viewPhoto.setScaleType(ImageView.ScaleType.FIT_XY);
+            viewPhoto.setTag(photoPath);
+        }
 
         textName.setText(editStudent.getName());
 
