@@ -62,10 +62,14 @@ public class StudentsInsertActivity extends AppCompatActivity {
                     }
 
                     studentDAO.close();
-                    Toast.makeText(StudentsInsertActivity.this, "Novo aluno " + student.getName() + " salvo!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StudentsInsertActivity.this,
+                            "Novo aluno " + student.getName() + " salvo!",
+                            Toast.LENGTH_SHORT).show();
                     finish();
                 }catch (Exception e){
-                    Toast.makeText(StudentsInsertActivity.this, "Erro ao salvar novo aluno. \n" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StudentsInsertActivity.this,
+                            "Erro ao salvar novo aluno. \n" + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
 
                 break;

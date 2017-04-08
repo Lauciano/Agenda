@@ -3,7 +3,6 @@ package br.com.costa.agenda.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
@@ -68,13 +67,20 @@ public class StudentDAO extends SQLiteOpenHelper{
         while (cursorReadStudents.moveToNext()){
 
             Student student = new Student();
-            student.setId(cursorReadStudents.getLong(cursorReadStudents.getColumnIndex("id")));
-            student.setName(cursorReadStudents.getString(cursorReadStudents.getColumnIndex("name")));
-            student.setAddress(cursorReadStudents.getString(cursorReadStudents.getColumnIndex("address")));
-            student.setEmail(cursorReadStudents.getString(cursorReadStudents.getColumnIndex("email")));
-            student.setNumber(cursorReadStudents.getString(cursorReadStudents.getColumnIndex("number")));
-            student.setSite(cursorReadStudents.getString(cursorReadStudents.getColumnIndex("site")));
-            student.setNote(cursorReadStudents.getDouble(cursorReadStudents.getColumnIndex("note")));
+            student.setId(cursorReadStudents.getLong(
+                    cursorReadStudents.getColumnIndex("id")));
+            student.setName(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("name")));
+            student.setAddress(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("address")));
+            student.setEmail(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("email")));
+            student.setNumber(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("number")));
+            student.setSite(cursorReadStudents.getString(
+                    cursorReadStudents.getColumnIndex("site")));
+            student.setNote(cursorReadStudents.getDouble(
+                    cursorReadStudents.getColumnIndex("note")));
 
             alunos.add(student);
         }
@@ -82,6 +88,31 @@ public class StudentDAO extends SQLiteOpenHelper{
         cursorReadStudents.close();
 
         return alunos;
+    }
+
+    public Student findStudentById(Long id) {
+        List<Student> students = read();
+        for(Student s : students) {
+            if(s.getId().equals(id)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    public String findStudentAttributeById(Long id, String att) {
+        SQLiteDatabase database = getReadableDatabase();
+        String sqlReadStudents =
+                "SELECT " + att + " FROM Students WHERE id = " + id.toString();
+
+        Cursor cursorReadStudents = database.rawQuery(sqlReadStudents, null);
+
+        cursorReadStudents.moveToNext();
+        String resposta = cursorReadStudents.getString((cursorReadStudents.getColumnIndex(att)));
+
+        cursorReadStudents.close();
+
+        return resposta;
     }
 
     public void delete(Long id) {
