@@ -67,7 +67,7 @@ public class StudentsListActivity extends AppCompatActivity {
 
         MenuItem callNumber = menu.add("Telefonar");
         MenuItem callEditedNumber = menu.add("Preparar para telefonar");
-        MenuItem goToSite = menu.add("Visitar number");
+        MenuItem goToSite = menu.add("Visitar site");
         MenuItem sendSMS = menu.add("Mandar SMS");
         MenuItem showAddress = menu.add("Ver endereço");
         MenuItem deleteMenuItem = menu.add("Delete");
