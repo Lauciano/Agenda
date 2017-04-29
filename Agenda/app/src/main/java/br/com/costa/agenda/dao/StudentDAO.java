@@ -134,6 +134,27 @@ public class StudentDAO extends SQLiteOpenHelper{
         database.update("Students", studentValues, "id = ?", params);
 
     }
+    
+    public String findStudentByPhone(String receivedNumber) {
+        SQLiteDatabase database = getReadableDatabase();
+        String sqlReadStudents =
+                "SELECT name FROM Students WHERE number = " + receivedNumber;
+
+        Cursor cursorReadStudents = database.rawQuery(sqlReadStudents, null);
+        List<String> alunos = new ArrayList<String>();
+
+        while (cursorReadStudents.moveToNext()) {
+            String resposta = cursorReadStudents.getString((cursorReadStudents.getColumnIndex("name")));
+            alunos.add(resposta);
+        }
+        cursorReadStudents.close();
+
+        if (alunos.size() > 0) {
+            return alunos.get(0);
+        } else {
+            return null;
+        }
+    }
 
     @NonNull
     private ContentValues getContentValues(Student student) {
