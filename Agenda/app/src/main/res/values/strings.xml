@@ -4,4 +4,5 @@
     <string name="title_activity_students_insert">Adicionar</string>
     <string name="title_activity_teste">TesteActivity</string>
     <string name="CALL_PHONE_PERMISSION">123</string>
+    <string name="student_photo">Foto de aluno</string>
 </resources>
