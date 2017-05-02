@@ -9,10 +9,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ import java.util.List;
 import br.com.costa.agenda.adapter.StudentAdapter;
 import br.com.costa.agenda.dao.StudentDAO;
 import br.com.costa.agenda.model.Student;
+import br.com.costa.agenda.task.SendStudentsTask;
 import br.com.costa.agenda.utils.ConstantCodes;
 
 public class StudentsListActivity extends AppCompatActivity {
@@ -211,6 +213,22 @@ public class StudentsListActivity extends AppCompatActivity {
         if(requestCode == ConstantCodes.CALL_PHONE_PERMISSION){
             // Insira algum tratamento a ser realizado na hora da requisição, se houver
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.this_menu_list, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        SendStudentsTask  send = (SendStudentsTask) new SendStudentsTask(this).execute();
+
+        return super.onOptionsItemSelected(item);
     }
 
 }
